@@ -292,13 +292,11 @@ mi_startup(void)
 	while ((sip = STAILQ_FIRST(&sysinit_list)) != NULL) {
 		STAILQ_REMOVE_HEAD(&sysinit_list, next);
 		STAILQ_INSERT_TAIL(&sysinit_done_list, sip, next);
-	TSEXIT2("STAILQ_foreach");
 		if (sip->subsystem == SI_SUB_DUMMY)
 			continue;	/* skip dummy task(s)*/
 
 		if (sip->subsystem > last)
 			BOOTTRACE_INIT("sysinit 0x%7x", sip->subsystem);
-	TSENTER2("rest");
 
 #if defined(VERBOSE_SYSINIT)
 		if (sip->subsystem > last && verbose_sysinit != 0) {
@@ -335,7 +333,7 @@ mi_startup(void)
 		/* Check off the one we're just done */
 		last = sip->subsystem;
 	}
-	TSEXIT2("rest");
+	TSEXIT2("STAILQ_foreach");
 
 	TSEXIT();	/* Here so we don't overlap with start_init. */
 	BOOTTRACE("mi_startup done");
