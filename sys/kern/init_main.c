@@ -269,6 +269,7 @@ mi_startup(void)
 		bootverbose++;
 
 	/* Construct and sort sysinit list. */
+	TSENTER2("mklist");
 	sysinit_mklist(&sysinit_list, SET_BEGIN(sysinit_set), SET_LIMIT(sysinit_set));
 
 	last = SI_SUB_COPYRIGHT;
@@ -278,6 +279,7 @@ mi_startup(void)
 	printf("VERBOSE_SYSINIT: DDB not enabled, symbol lookups disabled.\n");
 #endif
 #endif
+	TSEXIT2("mklist");
 
 	/*
 	 * Perform each system initialization task from the ordered list.  Note
@@ -286,15 +288,17 @@ mi_startup(void)
 	 * STAILQ_FOREACH macro would result in items being skipped if inserted
 	 * earlier than the "current item".
 	 */
+	TSENTER2("STAILQ_foreach");
 	while ((sip = STAILQ_FIRST(&sysinit_list)) != NULL) {
 		STAILQ_REMOVE_HEAD(&sysinit_list, next);
 		STAILQ_INSERT_TAIL(&sysinit_done_list, sip, next);
-
+	TSEXIT2("STAILQ_foreach");
 		if (sip->subsystem == SI_SUB_DUMMY)
 			continue;	/* skip dummy task(s)*/
 
 		if (sip->subsystem > last)
 			BOOTTRACE_INIT("sysinit 0x%7x", sip->subsystem);
+	TSENTER2("rest");
 
 #if defined(VERBOSE_SYSINIT)
 		if (sip->subsystem > last && verbose_sysinit != 0) {
@@ -331,6 +335,7 @@ mi_startup(void)
 		/* Check off the one we're just done */
 		last = sip->subsystem;
 	}
+	TSEXIT2("rest");
 
 	TSEXIT();	/* Here so we don't overlap with start_init. */
 	BOOTTRACE("mi_startup done");
