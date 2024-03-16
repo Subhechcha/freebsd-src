@@ -132,14 +132,18 @@ run_interrupt_driven_config_hooks(void)
 	}
 	running = 1;
 
+	TSENTER2("while");
 	while (next_to_notify != NULL) {
 		hook_entry = next_to_notify;
+		TSENTER2("stailq");
 		next_to_notify = STAILQ_NEXT(hook_entry, ich_links);
+		TSEXIT2("stailq");
 		hook_entry->ich_state = ICHS_RUNNING;
 		mtx_unlock(&intr_config_hook_lock);
 		(*hook_entry->ich_func)(hook_entry->ich_arg);
 		mtx_lock(&intr_config_hook_lock);
 	}
+	TSEXIT2("while");
 
 	running = 0;
 	mtx_unlock(&intr_config_hook_lock);
