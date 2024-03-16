@@ -257,19 +257,19 @@ void
 mi_startup(void)
 {
 
+	TSENTER();
+	TSENTER2("mklist");
 	struct sysinit *sip;
 	int last;
 #if defined(VERBOSE_SYSINIT)
 	int verbose;
 #endif
 
-	TSENTER();
 
 	if (boothowto & RB_VERBOSE)
 		bootverbose++;
 
 	/* Construct and sort sysinit list. */
-	TSENTER2("mklist");
 	sysinit_mklist(&sysinit_list, SET_BEGIN(sysinit_set), SET_LIMIT(sysinit_set));
 
 	last = SI_SUB_COPYRIGHT;
